@@ -56,28 +56,31 @@ const Dashboard = () => {
       <SearchBox onSearch={handleSearch} />
       {/* Table displaying animal records */}
       <AnimalTable animals={animals} onRowClick={handleRowClick} />
-      {/* Display animal details when a row is clicked */}
+
+      {/* Modal overlay for animal details */}
       {selectedAnimal && (
-  <div className="animal-details">
-    <button onClick={handleCloseDetails} className="close-button" aria-label="Close details">
-      &times;
-    </button>
-    <div className="details-content">
-      <div className="animal-info">
-        <h2>{selectedAnimal.name}</h2>
-        <p><strong>Breed:</strong> {selectedAnimal.breed}</p>
-        <p><strong>Type:</strong> {selectedAnimal.animal_type}</p>
-        <p><strong>Additional Details:</strong> {/* add more details as needed */}</p>
-      </div>
-      <div className="map-container">
-        <MapComponent 
-          latitude={selectedAnimal.location_lat} 
-          longitude={selectedAnimal.location_long} 
-          name={selectedAnimal.name} 
-        />
-      </div>
-    </div>
-  </div>
+        <div className="modal-overlay" onClick={handleCloseDetails}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button onClick={handleCloseDetails} className="close-button" aria-label="Close details">
+              &times;
+            </button>
+            <div className="modal-body">
+              <div className="animal-info">
+                <h2>{selectedAnimal.name}</h2>
+                <p><strong>Breed:</strong> {selectedAnimal.breed}</p>
+                <p><strong>Type:</strong> {selectedAnimal.animal_type}</p>
+                <p><strong>Additional Details:</strong> {/* add more details as needed */}</p>
+              </div>
+              <div className="map-container">
+                <MapComponent 
+                  latitude={selectedAnimal.location_lat} 
+                  longitude={selectedAnimal.location_long} 
+                  name={selectedAnimal.name} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

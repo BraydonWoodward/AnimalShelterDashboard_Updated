@@ -1,12 +1,15 @@
-// index.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import animalRoutes from './routes/animalRoutes.js'; // Import api animal routes
+import connectDB from './db.js';
 
 
 dotenv.config();
 const app = express();
+
+// Connect to MongoDB
+connectDB();
 
 // Middleware to parse JSON bodies
 app.use(express.json());

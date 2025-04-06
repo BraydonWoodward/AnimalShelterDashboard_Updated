@@ -1,77 +1,85 @@
-// routes/animalRoutes.js
 import express from 'express';
-const router = express.Router();
-import mockAnimals from '../mockAnimals.js'; // Mock data file
+import Animal from '../models/Animal.js';
 
-// In-memory data store of mock animals
-let animals = [...mockAnimals];
+const router = express.Router();
 
 /** 
  * GET /api/animals 
  * Retrieve all animals (or filter them)
  * **Will need to be updated when connected to MongoDB
  */
-router.get('/', (req, res) => {
-  // Extract query parameters
-  const { animal_type, breed, name } = req.query;
+router.get('/', async (req, res) => {
+  try {
+    // Extract query parameters
+    const { animal_type, breed, name } = req.query;
 
-  // Start with all animals
-  let filteredAnimals = animals;
+    // Build a filter object for an OR search
+    let filter = {};
+    if (name || breed || animal_type) {
+      filter = {
+        $or: [
+          name ? { name: { $regex: name, $options: 'i' } } : {},
+          breed ? { breed: { $regex: breed, $options: 'i' } } : {},
+          animal_type ? { animal_type: { $regex: animal_type, $options: 'i' } } : {},
+        ],
+      };
+    }
 
- // If any of these filters are provided, use an OR condition
- if (name || breed || animal_type) {
-  filteredAnimals = animals.filter(animal => {
-    return (
-      (name && animal.name.toLowerCase().includes(name.toLowerCase())) ||
-      (breed && animal.breed.toLowerCase().includes(breed.toLowerCase())) ||
-      (animal_type && animal.animal_type.toLowerCase().includes(animal_type.toLowerCase()))
-    );
-  });
-}
-  res.json(filteredAnimals);
+    const animals = await Animal.find(filter);
+    res.json(animals);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /**
  * POST /api/animals
  * Create a new animal record 
  */
-router.post('/', (req, res) => {
-  const newAnimal = req.body;
-  // Assign a simple ID if one isn't provided
-  if (!newAnimal._id) {
-    newAnimal._id = Date.now().toString();
+router.post('/', async (req, res) => {
+  try {
+    const newAnimal = new Animal(req.body);
+    const savedAnimal = await newAnimal.save();
+    res.status(201).json(savedAnimal);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  animals.push(newAnimal);
-  res.status(201).json(newAnimal);
 });
 
 /**
  * PUT /api/animals/:id
  * Update an existing animal record
  */
-router.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const index = animals.findIndex((a) => a._id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Animal not found' });
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedAnimal = await Animal.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!updatedAnimal) {
+      return res.status(404).json({ error: 'Animal not found' });
+    }
+    res.json(updatedAnimal);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  // Merge the new data with the existing record
-  animals[index] = { ...animals[index], ...req.body };
-  res.json(animals[index]);
-});
+})
 
 /**
  * DELETE /api/animals/:id
  * Delete an animal record
  */
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  const index = animals.findIndex((a) => a._id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Animal not found' });
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedAnimal = await Animal.findByIdAndDelete(req.params.id);
+    if (!deletedAnimal) {
+      return res.status(404).json({ error: 'Animal not found' });
+    }
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  animals.splice(index, 1);
-  res.status(204).end();
 });
 
 export default router;

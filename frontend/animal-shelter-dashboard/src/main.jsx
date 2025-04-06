@@ -4,6 +4,9 @@ import './styles/main.css' // Global styles
 import App from './App' // Main app component
 import 'leaflet/dist/leaflet.css'; // Import leaflet's CSS 
 
+/**
+ * Entry point for the React application.
+ */
 const root = document.getElementById('root');
 if (root) {
   createRoot(root).render(
