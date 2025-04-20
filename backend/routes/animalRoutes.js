@@ -37,12 +37,15 @@ router.get('/', async (req, res) => {
  * Create a new animal record 
  */
 router.post('/', async (req, res) => {
+  console.log('Received POST /api/animals:', req.body);
   try {
     const newAnimal = new Animal(req.body);
-    const savedAnimal = await newAnimal.save();
-    res.status(201).json(savedAnimal);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const saved = await newAnimal.save();
+    console.log('Saved document:', saved);
+    return res.status(201).json(saved);
+  } catch (e) {
+    console.error('Error saving animal:', e);
+    return res.status(500).json({ error: e.message });
   }
 });
 

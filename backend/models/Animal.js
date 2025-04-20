@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const animalSchema = new mongoose.Schema({
-  rec_num: Number,
+  rec_num:   { type: Number, required: true, unique: true, index: true },
+  animal_id: { type: String, required: true, unique: true, index: true },
   age_upon_outcome: String,
-  animal_id: String,
   animal_type: String,
   breed: String,
   color: String,

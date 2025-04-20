@@ -1,6 +1,19 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Library for building the map component
 
+// Import the default marker images so Vite copies them into /assets so they work inside docker
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Override Leaflet’s default icon URLs
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
 /**
  * MapComponent - Displays a map centered on given coordinates.
  * @param {number} latitude - Latitude coordinate.
